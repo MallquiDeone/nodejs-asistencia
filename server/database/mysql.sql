@@ -23,6 +23,6 @@ CREATE TABLE tblEstudiante(
     vApellido_m VARCHAR(50) NOT NULL,
     url TEXT,
     public_id TEXT,
-    estado INT,
+    estado INT DEFAULT 0,
     PRIMARY KEY(estudiante_id)
 );
