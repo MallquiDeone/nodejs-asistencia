@@ -23,6 +23,7 @@ export const getStudent = async (req, res) => {
       return res.status(404).json({ message: "Estudiante no encontrado" });
     res.json(result[0]);
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: error.message });
   }
 };
