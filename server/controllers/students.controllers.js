@@ -4,7 +4,7 @@ import fs from "fs-extra";
 // GET /students
 export const getstudents = async (req, res) => {
   try {
-    const [result] = await pool.query("SELECT * FROM tblEstudiante");
+    const [result] = await pool.query("SELECT * FROM estudiantes");
     res.json(result);
   } catch (error) {
     console.log(error);
@@ -16,7 +16,7 @@ export const getstudents = async (req, res) => {
 export const getStudent = async (req, res) => {
   try {
     const [result] = await pool.query(
-      "SELECT * FROM tblEstudiante WHERE cDni = ?",
+      "SELECT * FROM estudiantes WHERE dni = ?",
       [req.params.id]
     );
     if (result.length == 0)
@@ -30,7 +30,7 @@ export const getStudent = async (req, res) => {
 // POST /students
 export const createStudents = async (req, res) => {
   try {
-    const { cDni, vNombres, vApellido_p, vApellido_m, estado } = req.body;
+    const { dni, nombres, apellido_p, apellido_m, numero_cel, id_turno } = req.body;
     let image;
     if (req.files?.image) {
       try {
@@ -49,13 +49,15 @@ export const createStudents = async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO tblEstudiante(cDni, vNombres, vApellido_p, vApellido_m, estado, url, public_id) VALUES(?,?,?,?,?,?,?)",
-      [cDni, vNombres, vApellido_p, vApellido_m, estado, image?.url || null,
-        image?.public_id || null,]
+      "INSERT INTO estudiantes(dni, nombres, apellido_p, apellido_m, url, public_id, numero_cel, id_turno) VALUES(?,?,?,?,?,?,?,?)",
+      [dni, nombres, apellido_p, apellido_m, image?.url || null,
+        image?.public_id || null, numero_cel, id_turno]
     );
     res.json({
       id: result.insertId,
-      vNombres,
+      dni,
+      nombres,
+      id_turno
     });
   } catch (error) {
     console.log(error);
@@ -66,7 +68,7 @@ export const createStudents = async (req, res) => {
 export const updateStudents = async (req, res) => {
   try {
     const [result] = await pool.query(
-      "UPDATE tblEstudiante SET ? WHERE cDni = ?",
+      "UPDATE estudiantes SET ? WHERE dni = ?",
       [req.body, req.params.id]
     );
     res.json(result);
@@ -80,7 +82,7 @@ export const deleteStudents = async (req, res) => {
   try {
     // Consulta para obtener la información de la imagen antes de eliminar el estudiante
     const [student] = await pool.query(
-      "SELECT public_id FROM tblEstudiante WHERE cDni = ?",
+      "SELECT public_id FROM estudiantes WHERE dni = ?",
       [req.params.id]
     );
 
@@ -94,7 +96,7 @@ export const deleteStudents = async (req, res) => {
 
     // Eliminar al estudiante de la base de datos
     const [result] = await pool.query(
-      "DELETE FROM tblEstudiante WHERE cDni = ?",
+      "DELETE FROM estudiantes WHERE dni = ?",
       [req.params.id]
     );
 

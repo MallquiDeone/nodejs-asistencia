@@ -1,28 +1,29 @@
-CREATE DATABASE db_asistencia;
-
-/*****  TABLA USUARIO *****/
-/*************************/
-CREATE TABLE tblUsuario(
-	usuario_id INT AUTO_INCREMENT,
-	tUsuario TEXT,
-    tContrasena TEXT,
-    rol_id INT,
-    tNombre VARCHAR(30),
-    tApellido VARCHAR(30),
-    PRIMARY KEY(usuario_id),
-    FOREIGN KEY(rol_id) REFERENCES tblRoles(rol_id)
+CREATE TABLE turno(
+    id_turno INT AUTO_INCREMENT,
+    tipo_turno VARCHAR(50),
+    hora_limite_entrada TIME,
+    PRIMARY KEY(id_turno)
 );
-
-/*****  TABLA ESTUDIANTE *****/
-/*************************/
-CREATE TABLE tblEstudiante(
-	estudiante_id INT AUTO_INCREMENT,
-    cDni CHAR(8) UNIQUE NOT NULL,
-    vNombres VARCHAR(50) NOT NULL,
-    vApellido_p VARCHAR(50) NOT NULL,
-    vApellido_m VARCHAR(50) NOT NULL,
+CREATE TABLE estudiantes(
+    dni INT,
+    nombres VARCHAR(50) NOT NULL,
+    apellido_p VARCHAR(50) NOT NULL,
+    apellido_m VARCHAR(50) NOT NULL,
+    numero_cel INT,
     url TEXT,
     public_id TEXT,
-    estado INT DEFAULT 0,
-    PRIMARY KEY(estudiante_id)
+    id_turno INT NOT NULL,
+    PRIMARY KEY(dni),
+    FOREIGN KEY (id_turno) REFERENCES turno(id_turno)
+);
+CREATE TABLE asistencia_general (
+    id_asistencia INT AUTO_INCREMENT,
+    dni INT NOT NULL,
+    fecha DATE NOT NULL DEFAULT (NOW()),
+    hora_entrada TIME NOT NULL DEFAULT (NOW()),
+    hora_salida TIME,
+    motivo_salida VARCHAR(255),
+    estado_asistencia INT DEFAULT 1,
+    PRIMARY KEY (id_asistencia),
+    FOREIGN KEY (dni) REFERENCES estudiantes(dni)
 );
