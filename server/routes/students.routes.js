@@ -9,14 +9,14 @@ import {
 
 const router = Router();
 
-router.get("/estudiante", getstudents);
+router.get('/estudiante', getstudents);
 
-router.get("/estudiante/:id", getStudent);
+router.get('/estudiante/:id', getStudent);
 
-router.post("/estudiante", createStudents);
+router.post('/estudiante', createStudents);
 
-router.put("/estudiante/:id", updateStudents);
+router.put('/estudiante/:id', updateStudents);
 
-router.delete("/estudiante/:id", deleteStudents);
+router.delete('/estudiante/:id', deleteStudents);
 
 export default router;

@@ -4,6 +4,8 @@ import fileUpload from "express-fileupload";
 import studentsRoutes from "./routes/students.routes.js";
 import asistenciaRoutes from "./routes/asistencia.routes.js";
 import turnoRoutes from "./routes/turno.routes.js";
+import gradoRoutes from "./routes/grado.routes.js";
+import seccionRoutes from "./routes/seccion.routes.js";
 
 const app = express();
 //Middlewares
@@ -16,5 +18,7 @@ app.use(fileUpload({
 app.use(studentsRoutes);
 app.use(asistenciaRoutes);
 app.use(turnoRoutes);
+app.use(gradoRoutes);
+app.use(seccionRoutes);
 
 export default app;
