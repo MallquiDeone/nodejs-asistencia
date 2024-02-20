@@ -30,7 +30,7 @@ export const getStudent = async (req, res) => {
 // POST /students
 export const createStudents = async (req, res) => {
   try {
-    const { dni, nombres, apellido_p, apellido_m, numero_cel, id_turno, id_grado, id_seccion } = req.body;
+    const { dni, nombres, apellido_p, apellido_m, sexo, numero_cel, id_turno, id_grado, id_seccion } = req.body;
     let image;
     if (req.files?.image) {
       try {
@@ -49,8 +49,8 @@ export const createStudents = async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO estudiantes(dni, nombres, apellido_p, apellido_m, url, public_id, numero_cel, id_turno, id_grado, id_seccion) VALUES(?,?,?,?,?,?,?,?,?,?)",
-      [dni, nombres, apellido_p, apellido_m, image?.url || null,
+      "INSERT INTO estudiantes(dni, nombres, apellido_p, apellido_m, sexo, url, public_id, numero_cel, id_turno, id_grado, id_seccion) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+      [dni, nombres, apellido_p, apellido_m, sexo, image?.url || null,
         image?.public_id || null, numero_cel, id_turno, id_grado, id_seccion]
     );
     res.json({

@@ -22,6 +22,7 @@ CREATE TABLE estudiantes(
     nombres VARCHAR(50) NOT NULL,
     apellido_p VARCHAR(50) NOT NULL,
     apellido_m VARCHAR(50) NOT NULL,
+    sexo VARCHAR(20) NOT NULL,
     numero_cel INT,
     url TEXT,
     public_id TEXT,
