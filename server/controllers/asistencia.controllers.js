@@ -54,7 +54,7 @@ export const getAsistencia = async(req, res) => {
     }
 }
 
-//Edpoint actualizar xdd chuchin gey y alex kabrera
+//Edpoint actualizar xdd chuchin 
 export const updateAsistencia = async(req, res) => {
     try {
         const [result] = await pool.query("UPDATE asistencia_general SET ? WHERE id_asistencia = ?", 
