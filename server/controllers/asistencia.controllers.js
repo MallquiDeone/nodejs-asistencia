@@ -7,6 +7,15 @@ export const createAsistencia = async (req, res) => {
         const fecha = now.toISOString().slice(0, 10);
         const hora_actual = now.toTimeString().slice(0, 8);
 
+        
+        // Informacion del estudiante
+        const [studentInfo] = await pool.query("SELECT url, nombres, apellido_p, apellido_m, id_grado, id_seccion FROM estudiantes WHERE dni = ?", [dni]);
+        console.log(studentInfo);
+        if (studentInfo.length === 0) {
+            return res.status(404).json({ message: "Estudiante no encontrado" });
+        }
+        //brutal
+
         // Verificar si ya existe un registro para ese dni y fecha
         const [existingResult] = await pool.query("SELECT * FROM asistencia_general WHERE dni = ? AND fecha = ? ORDER BY id_asistencia DESC LIMIT 1", [dni, fecha]);
         if (existingResult.length > 0) {
