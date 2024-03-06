@@ -59,20 +59,38 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    const { usuario, contrasena } = req.body;
-    const [result] = await pool.query("SELECT usuario, contrasena FROM usuario WHERE usuario = ? AND contrasena = ?",
-      [usuario, contrasena]
-    );
+    const { correo, contrasena } = req.body;
 
-    if (result.length === 0) {
-      // No se encontraron coincidencias, credenciales incorrectas
-      return res.status(401).json({ message: "Usuario y/o contraseña incorrectos", success: false });
+    // Verificar que correo y contrasena estén definidos
+    if (!correo || !contrasena) {
+      return res.status(400).json({ message: "Correo y contraseña son requeridos" });
     }
 
-    // Credenciales correctas
-    res.status(200).json({ message: "Credenciales correctas", success: true });
+    const [userFound] = await pool.query(
+      "SELECT * FROM usuario WHERE correo = ?",
+      [correo]
+    );
+
+    // Verificar si se encontró un usuario
+    if (!userFound || userFound.length === 0) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const isMatch = await bcrypt.compare(contrasena, userFound[0].contrasena);
+
+    if (!isMatch)
+      return res.status(401).json({ message: "Contraseña incorrecta" });
+
+    const token = await createAccessToken({ id: userFound[0].id_usuario });
+
+    res.cookie("token", token);
+    res.json({
+      id: userFound[0].id_usuario,
+      correo,
+      contrasena,
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: error.message, success: false });
+    console.log(error);
+    res.status(500).json({ message: error.message });
   }
 };
