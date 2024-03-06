@@ -5,38 +5,35 @@ export const createAsistencia = async (req, res) => {
         const { dni } = req.body;
         const now = new Date();
         const fecha = now.toISOString().slice(0, 10);
-        const hora_actual = now.toTimeString().slice(0, 8);
-
-        
-        // Informacion del estudiante
-        const [studentInfo] = await pool.query("SELECT url, nombres, apellido_p, apellido_m, id_grado, id_seccion FROM estudiantes WHERE dni = ?", [dni]);
-        console.log(studentInfo);
-        if (studentInfo.length === 0) {
-            return res.status(404).json({ message: "Estudiante no encontrado" });
+    
+        const [existingAttendance] = await pool.query(
+          "SELECT * FROM asistencia_general WHERE dni = ? AND fecha = ?",
+          [dni, fecha]
+        );
+    
+        if (existingAttendance.length > 0) {
+          return res.status(400).json({ message: "Asistencia ya registrada para este estudiante en la fecha actual", success: false });
         }
-        //brutal
-
-        // Verificar si ya existe un registro para ese dni y fecha
-        const [existingResult] = await pool.query("SELECT * FROM asistencia_general WHERE dni = ? AND fecha = ? ORDER BY id_asistencia DESC LIMIT 1", [dni, fecha]);
-        if (existingResult.length > 0) {
-            if (!existingResult[0].hora_salida) {
-                // Actualizar el registro existente con la hora de salida
-                await pool.query("UPDATE asistencia_general SET hora_salida = ? WHERE id_asistencia = ?", [hora_actual, existingResult[0].id_asistencia]);
-                res.json({ message: 'Hora de salida registrada correctamente.' });
-            } else {
-                // Insertar un nuevo registro con la hora de entrada
-                await pool.query("INSERT INTO asistencia_general(dni, fecha, hora_entrada) VALUES (?, ?, ?)", [dni, fecha, hora_actual]);
-                res.json({ message: 'Nuevo registro de hora de entrada registrado correctamente.' });
-            }
-        } else {
-            // Insertar un nuevo registro con la hora de entrada y hora de salida
-            await pool.query("INSERT INTO asistencia_general(dni, fecha, hora_entrada, hora_salida) VALUES (?, ?, ?, ?)", [dni, fecha, hora_actual, null]);
-            res.json({ message: 'Hora de entrada registrada correctamente.' });
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: error.message });
-    }
+    
+        const hora_entrada = now.toLocaleTimeString();
+    
+        // Insertar en la tabla asistencia_general
+        await pool.query(
+          "INSERT INTO asistencia_general (dni, fecha, hora_entrada, hora_salida) VALUES (?, ?, ?, NULL)",
+          [dni, fecha, hora_entrada]
+        );
+    
+        // Obtener información del estudiante
+        const [studentInfo] = await pool.query(
+          "SELECT * FROM estudiantes WHERE dni = ?",
+          [dni]
+        );
+    
+        res.status(201).json({ message: "Asistencia registrada exitosamente", success: true, studentInfo: studentInfo[0] });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message, success: false });
+      }
 };
 
 
