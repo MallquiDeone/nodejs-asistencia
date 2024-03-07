@@ -4,7 +4,8 @@ import {
   getStudent,
   createStudents,
   updateStudents,
-  deleteStudents
+  deleteStudents,
+  reporteEstudiante
 } from "../controllers/students.controllers.js";
 
 const router = Router();
@@ -18,5 +19,7 @@ router.post('/estudiante', createStudents);
 router.put('/estudiante/:id', updateStudents);
 
 router.delete('/estudiante/:id', deleteStudents);
+
+router.get('/reporte/:id', reporteEstudiante);
 
 export default router;

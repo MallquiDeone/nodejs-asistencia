@@ -19,7 +19,12 @@ export const createAsistencia = async (req, res) => {
             [now, existingAttendance[0].id_asistencia]
           );
           const updatedAttendance = { ...existingAttendance[0], hora_salida: now };
-          return res.status(200).json({ message: "Hora de salida registrada correctamente", success: true, attendance: updatedAttendance });
+          // Obtener información del estudiante
+          const [studentInfo] = await pool.query(
+            "SELECT * FROM estudiantes WHERE dni = ?",
+            [dni]
+          );
+          return res.status(200).json({ message: "Hora de salida registrada correctamente", success: true, attendance: updatedAttendance, studentInfo: studentInfo[0] });
         }
 
         // Obtener la hora límite del horario para el estudiante

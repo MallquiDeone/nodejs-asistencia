@@ -30,7 +30,7 @@ export const getStudent = async (req, res) => {
 // POST /students
 export const createStudents = async (req, res) => {
   try {
-    const { dni, nombres, apellido_p, apellido_m, sexo, numero_cel, id_turno, id_grado, id_seccion } = req.body;
+    const { dni, nombres, apellido_p, apellido_m, sexo, numero_cel, id_turno, id_grado, id_seccion, id_horario } = req.body;
     let image;
     if (req.files?.image) {
       try {
@@ -49,9 +49,9 @@ export const createStudents = async (req, res) => {
     }
 
     const [result] = await pool.query(
-      "INSERT INTO estudiantes(dni, nombres, apellido_p, apellido_m, sexo, url, public_id, numero_cel, id_turno, id_grado, id_seccion) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO estudiantes(dni, nombres, apellido_p, apellido_m, sexo, url, public_id, numero_cel, id_turno, id_grado, id_seccion, id_horario) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
       [dni, nombres, apellido_p, apellido_m, sexo, image?.url || null,
-        image?.public_id || null, numero_cel, id_turno, id_grado, id_seccion]
+        image?.public_id || null, numero_cel, id_turno, id_grado, id_seccion, id_horario]
     );
     res.json({
       id: result.insertId,
@@ -119,3 +119,33 @@ export const deleteStudents = async (req, res) => {
   }
 };
 
+//Reporte de un estudiante al mes por fecha actual
+export const reporteEstudiante = async(req, res) => {
+  try {
+    const { id } = req.params;
+    // Verificar que se proporcionó un DNI válido
+    if (!id) {
+      return res.status(400).json({ message: "Debe proporcionar un DNI válido" });
+    }
+
+    const [result] = await pool.query(`
+      SELECT e.dni, e.nombres, e.apellido_p, e.apellido_m, ag.fecha, ag.hora_entrada, ag.hora_salida, ag.estado_asistencia
+      FROM estudiantes e
+      INNER JOIN asistencia_general ag ON e.dni = ag.dni
+      WHERE e.dni = ? 
+      AND MONTH(ag.fecha) = MONTH(CURRENT_DATE())
+      AND YEAR(ag.fecha) = YEAR(CURRENT_DATE())
+      ORDER BY ag.fecha ASC, ag.hora_entrada ASC;
+    `, [id]);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "No se encontraron registros de asistencia para el estudiante con el DNI proporcionado" });
+    }
+
+    res.status(200).json({ message: "Consulta exitosa", success: true, result });
+
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+}
