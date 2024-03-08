@@ -2,7 +2,7 @@ import { pool } from "../db.js";
 import { uploadImage, deleteImage } from "../libs/cloudinary.js";
 import fs from "fs-extra";
 // GET /students
-export const getstudents = async (req, res) => {
+/* export const getstudents = async (req, res) => {
   try {
     const [result] = await pool.query("SELECT * FROM estudiantes");
     res.json(result);
@@ -10,7 +10,7 @@ export const getstudents = async (req, res) => {
     console.log(error);
     res.status(500).json({ message: error.message });
   }
-};
+}; */
 
 // GET /students/:{id}
 export const getStudent = async (req, res) => {
@@ -147,5 +147,66 @@ export const reporteEstudiante = async(req, res) => {
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Error interno del servidor" });
+  }
+}
+
+export const reporteGradoSeccion = async(req, res) => {
+  try {
+    const  { id_grado, id_seccion } = req.params;
+    if(!id_grado  || !id_seccion ) {
+      return res.status(400).json({ message: "Debe proporcionar IDs de grado y seccion validos" })
+    }
+    const [result] = await pool.query(`
+    SELECT e.dni, e.nombres, e.apellido_p, e.apellido_m, ag.fecha, ag.hora_entrada, ag.hora_salida, ag.estado_asistencia
+    FROM estudiantes e
+    INNER JOIN asistencia_general ag ON e.dni = ag.dni
+    WHERE e.id_grado = ? AND e.id_seccion = ?
+    AND ag.fecha = (
+      SELECT MAX(fecha)
+      FROM asistencia_general
+      WHERE dni = e.dni
+    );
+  `,
+    [id_grado, id_seccion]
+  )
+  if (result.length === 0) {
+    return res.status(404).json({ message: "No se encontraron registros de asistencia para el grado y sección proporcionados" });
+  }
+
+  res.status(200).json({ message: "Consulta exitosa", success: true, result });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+}
+
+export const reporteGeneral = async(req, res) => {
+  try {
+    const [result] = await pool.query(`
+    SELECT e.dni, e.nombres, e.apellido_p, e.apellido_m, ag.fecha, ag.hora_entrada, ag.hora_salida, ag.estado_asistencia
+    FROM estudiantes e
+    INNER JOIN asistencia_general ag ON e.dni = ag.dni
+      WHERE ag.fecha = (
+        SELECT MAX(fecha)
+        FROM asistencia_general
+        WHERE dni = e.dni
+      );
+    `)
+    if(result.length === 0) {
+      return res.status(404).json({ message: "No se encontraron registros de asistencia para ningun estudiante" })
+    }
+    res.status(200).json({ message: "Consulta exitosa", success: true, result });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+}
+
+export const totalEstudiantes = async(req, res) => {
+  try {
+    const [result] = await pool.query("SELECT * FROM estudiantes")
+    res.json(result)
+  } catch (error) {
+    
   }
 }
