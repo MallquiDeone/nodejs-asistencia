@@ -5,14 +5,17 @@ import {
     getAsistencia,
     updateAsistencia,
     deleteAsistencia,
-    createAsistenciaFalta
+    createAsistenciaFalta,
+    createPermiso
 } from "../controllers/asistencia.controllers.js";
 
 const router = Router();
 
 router.post('/asistencia', createAsistencia)
 
-router.post('/asistenciafalta', createAsistenciaFalta)
+router.post('/falta', createAsistenciaFalta) //modificado
+
+router.put('/permiso', createPermiso) //Agregado
 
 router.get('/asistencia', getAsistencias)
 
